@@ -3,6 +3,7 @@ import { Box, styled, Typography } from '@mui/material'
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined'
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart'
 import { useRouter } from 'next/router'
+import { useSession } from 'next-auth/react'
 import { useDispatch } from 'react-redux'
 import { addLastSeen } from '../redux/slices/lastSeenSlice'
 import { errorToast, successToast } from '../redux/slices/toastSlice'
@@ -86,18 +87,21 @@ export default function Card({ product, sx }) {
 
 function Action({ product }) {
   const dispatch = useDispatch()
+  const { data: session } = useSession()
 
   async function addToCart(e) {
     e.stopPropagation()
-    const res = await fetch(`http://localhost:3000/api/v1/cart`, {
+    const res = await fetch(`http://localhost:4000/api/v1/cart`, {
       method: 'POST',
-      credentials: 'include',
       body: JSON.stringify({
         productId: product.id,
         lamaSewa: 1,
         qty: 1,
       }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        access_token: session?.user.accessToken,
+        'Content-Type': 'application/json',
+      },
     })
     const data = await res.json()
     if (res.status === 200) {
@@ -110,11 +114,13 @@ function Action({ product }) {
   async function addToWishlist(e) {
     e.stopPropagation()
     console.log(product.id)
-    const res = await fetch('http://localhost:3000/api/v1/wishlist', {
+    const res = await fetch('http://localhost:4000/api/v1/wishlist', {
       method: 'POST',
-      credentials: 'include',
       body: JSON.stringify({ productId: product.id }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        access_token: session?.user.accessToken,
+      },
     })
     const data = await res.json()
     if (res.status === 200) {
