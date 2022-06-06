@@ -16,6 +16,7 @@
     "@mui/material": "^5.8.2",
     "@mui/styles": "^5.8.0",
     "@reduxjs/toolkit": "^1.8.2",
+    "formik": "^2.2.9",
     "jsonwebtoken": "^8.5.1",
     "next": "12.1.6",
     "next-auth": "^4.3.4",
