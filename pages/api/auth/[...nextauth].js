@@ -45,20 +45,18 @@ export default NextAuth({
   callbacks: {
     async signIn({ account, email, profile, user, credentials }) {
       if (account.provider !== 'credentials') {
-        console.log('oauth ...............')
         try {
           const res = await fetch(
             `http://localhost:4000/api/v1/user?email=${user.email}&provider=${account.provider}`
           )
           const oldUser = await res.json()
-          if (res.ok) {
-            user.id = oldUser.id
-            user.role = oldUser.role
-            user.name = oldUser.name
-            user.image = oldUser.image
-            user.provider = oldUser.provider
-          } else if (res.status === 404) {
-            console.log('buat user baru')
+          if (res.ok && oldUser.count) {
+            user.id = oldUser.rows[0].id
+            user.role = oldUser.rows[0].role
+            user.name = oldUser.rows[0].name
+            user.image = oldUser.rows[0].image
+            user.provider = oldUser.rows[0].provider
+          } else if (res.ok && !oldUser.count) {
             const { id, ...dataUser } = user
             const res = await fetch(`http://localhost:4000/api/v1/signup`, {
               method: 'POST',
@@ -84,33 +82,23 @@ export default NextAuth({
       }
       const maxAge = 60 * 60 * 24 * 30
       user.accessToken = createToken(user, maxAge)
-      // console.log('signin account', account)
-      // console.log('signin email', email)
-      // console.log('signin profile', profile)
-      console.log('signin user', user)
-      // console.log('signin credentials', credentials)
       return true
     },
-    async jwt({ token, user, account, isNewUser, profile }) {
-      console.log('jwt user', user)
-      // console.log('jwt account', account)
-      // console.log('jwt isNewUser', isNewUser)
-      // console.log('jwt profile', profile)
+    async redirect({ baseUrl }) {
+      return baseUrl
+    },
+    async jwt({ token, user }) {
       if (user) {
         token.role = user.role
         token.provider = user.provider
         token.accessToken = user.accessToken
       }
-      console.log('jwt token', token)
       return token
     },
-    async session({ token, session, user }) {
-      // console.log('session-token', token)
-      // console.log('session-user', user)
+    async session({ token, session }) {
       session.user.id = token.sub
       session.user.role = token.role
       session.user.accessToken = token.accessToken
-      console.log('session-session', session)
       return session
     },
   },
