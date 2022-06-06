@@ -1,17 +1,24 @@
 import { Box, Button, Checkbox, Container, Typography } from '@mui/material'
 import { styled } from '@mui/system'
 import { useEffect, useRef, useState } from 'react'
-import InputNumber from '../components/InputNumber'
-import Layout from '../components/Layout'
+import InputNumber from '../../components/InputNumber'
+import Layout from '../../components/Layout'
 import { useDispatch } from 'react-redux'
-import { errorToast } from '../redux/slices/toastSlice'
+import { errorToast } from '../../redux/slices/toastSlice'
 import { getToken } from 'next-auth/jwt'
 import { useSession } from 'next-auth/react'
 
 export async function getServerSideProps({ req }) {
-  const { accessToken } = await getToken({ req })
+  const token = await getToken({ req })
+  if (!token)
+    return {
+      redirect: {
+        destination: '/auth/signin',
+        permanent: false,
+      },
+    }
   const res = await fetch('http://localhost:4000/api/v1/cart', {
-    headers: { access_token: accessToken },
+    headers: { access_token: token?.accessToken },
   })
   const fallbackData = await res.json()
   return { props: { fallbackData } }
