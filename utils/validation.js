@@ -49,10 +49,5 @@ export const validationSignup = Yup.object({
     .matches(/[A-Z]/, 'minimal 1 huruf besar')
     .matches(/\d/, 'minimal 1 angka')
     .required('wajib di isi'),
-  firstName: Yup.string()
-    .max(70, 'maximal 70 karakter')
-    .required('wajib di isi'),
-  address: Yup.string()
-    .max(255, 'maximal 255 karakter')
-    .required('wajib di isi'),
+  name: Yup.string().max(70, 'maximal 70 karakter').required('wajib di isi'),
 })
