@@ -2,13 +2,13 @@ import { Box } from '@mui/material'
 import ListProduct from '../components/ListProduct'
 import Layout from '../components/Layout'
 
-export async function getServerSideProps() {
+export async function getStaticProps() {
   const { rows: list1 } = await (
-    await fetch('http://localhost:3000/api/v1/product?limit=6')
+    await fetch('http://localhost:4000/api/v1/product?limit=6')
   ).json()
   const { rows: list2 } = await (
     await fetch(
-      'http://localhost:3000/api/v1/product?limit=6&orderBy=createdAt',
+      'http://localhost:4000/api/v1/product?limit=6&orderBy=createdAt',
       {
         credentials: 'include',
       }
@@ -19,12 +19,11 @@ export async function getServerSideProps() {
     props: {
       list1,
       list2,
-      list3: list1,
     },
   }
 }
 
-export default function Home({ list1, list2, list3 }) {
+export default function Home({ list1, list2 }) {
   return (
     <Layout>
       <Box pt={1}>
@@ -47,7 +46,7 @@ export default function Home({ list1, list2, list3 }) {
           <ListProduct title="Product Terbaru" products={list2} />
         </Box>
         <Box>
-          <ListProduct title="Semoga harimu menyenangkan" products={list3} />
+          <ListProduct title="Semoga harimu menyenangkan" products={list1} />
         </Box>
       </Box>
     </Layout>

@@ -4,7 +4,7 @@ import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlin
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart'
 import { useRouter } from 'next/router'
 import { useDispatch } from 'react-redux'
-import { addLastSeen } from '../redux/slices/productsSlice'
+import { addLastSeen } from '../redux/slices/lastSeenSlice'
 import { errorToast, successToast } from '../redux/slices/toastSlice'
 
 export default function Card({ product, sx }) {

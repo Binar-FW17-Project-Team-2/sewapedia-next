@@ -44,7 +44,6 @@ import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import dataCategory from '../utils/data/category'
 import Image from 'next/image'
 import { useSession, signIn, signOut } from 'next-auth/react'
 
@@ -138,6 +137,17 @@ const stylePaper = createTheme(theme, {
 function NavBot() {
   const [open, setOpen] = useState({ value: false, anchorEl: null })
   const { data } = useSession()
+  const [categories, setCategories] = useState([])
+
+  useEffect(() => {
+    async function getCategories() {
+      const categories = await (
+        await fetch('http://localhost:4000/api/v1/category')
+      ).json()
+      setCategories(categories)
+    }
+    getCategories()
+  }, [])
 
   function handleOpen(e) {
     setOpen({
@@ -183,7 +193,7 @@ function NavBot() {
           open={open.value}
           onClose={handleClose}
         >
-          {dataCategory.map((category, idx) => (
+          {categories?.map((category, idx) => (
             <MenuItem onClick={handleClose} key={idx}>
               {category.name}
             </MenuItem>

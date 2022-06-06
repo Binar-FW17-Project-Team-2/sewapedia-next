@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
-import { addLastSeen, selectLastSeen } from '../../redux/slices/productsSlice'
+import { addLastSeen, selectLastSeen } from '../../redux/slices/lastSeenSlice'
 import { useRouter } from 'next/router'
 import Image from 'next/image'
 
