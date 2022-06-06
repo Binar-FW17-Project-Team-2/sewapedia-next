@@ -138,6 +138,7 @@ function NavBot() {
   const [open, setOpen] = useState({ value: false, anchorEl: null })
   const { data } = useSession()
   const [categories, setCategories] = useState([])
+  const router = useRouter()
 
   useEffect(() => {
     async function getCategories() {
@@ -194,7 +195,13 @@ function NavBot() {
           onClose={handleClose}
         >
           {categories?.map((category, idx) => (
-            <MenuItem onClick={handleClose} key={idx}>
+            <MenuItem
+              onClick={() => {
+                handleClose()
+                router.push(`/products?category=${category.name}`)
+              }}
+              key={idx}
+            >
               {category.name}
             </MenuItem>
           ))}
