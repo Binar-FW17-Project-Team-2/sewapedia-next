@@ -85,7 +85,7 @@ export default function SignInSide() {
               }}
               validationSchema={validationSignup}
               onSubmit={(values) => {
-                fetch(`http://localhost:4000/api/v1/signup`, {
+                fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/signup`, {
                   method: 'POST',
                   body: JSON.stringify({
                     email: values.email,

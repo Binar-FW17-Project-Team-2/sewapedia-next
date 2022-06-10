@@ -91,7 +91,7 @@ function Action({ product }) {
 
   async function addToCart(e) {
     e.stopPropagation()
-    const res = await fetch(`http://localhost:4000/api/v1/cart`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/cart`, {
       method: 'POST',
       body: JSON.stringify({
         productId: product.id,
@@ -99,7 +99,7 @@ function Action({ product }) {
         qty: 1,
       }),
       headers: {
-        access_token: session?.user.accessToken,
+        authorization: `Bearer ${session?.user.accessToken}`,
         'Content-Type': 'application/json',
       },
     })
@@ -114,14 +114,17 @@ function Action({ product }) {
   async function addToWishlist(e) {
     e.stopPropagation()
     console.log(product.id)
-    const res = await fetch('http://localhost:4000/api/v1/wishlist', {
-      method: 'POST',
-      body: JSON.stringify({ productId: product.id }),
-      headers: {
-        'Content-Type': 'application/json',
-        access_token: session?.user.accessToken,
-      },
-    })
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/wishlist`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ productId: product.id }),
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${session?.user.accessToken}`,
+        },
+      }
+    )
     const data = await res.json()
     if (res.status === 200) {
       return dispatch(successToast(data.message))

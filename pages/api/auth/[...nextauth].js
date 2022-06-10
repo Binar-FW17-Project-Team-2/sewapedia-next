@@ -25,16 +25,19 @@ export default NextAuth({
         password: { label: 'password', type: 'password' },
       },
       async authorize(credentials, req) {
-        const res = await fetch('http://localhost:4000/api/v1/login', {
-          method: 'POST',
-          body: JSON.stringify({
-            email: credentials.email,
-            password: credentials.password,
-          }),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/login`,
+          {
+            method: 'POST',
+            body: JSON.stringify({
+              email: credentials.email,
+              password: credentials.password,
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        )
         const user = await res.json()
         if (!res.ok) throw new Error(JSON.stringify(user))
         if (res.ok && user) return user
@@ -47,7 +50,7 @@ export default NextAuth({
       if (account.provider !== 'credentials') {
         try {
           const res = await fetch(
-            `http://localhost:4000/api/v1/user?email=${user.email}&provider=${account.provider}`
+            `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/user?email=${user.email}&provider=${account.provider}`
           )
           const oldUser = await res.json()
           if (res.ok && oldUser.count) {
@@ -58,11 +61,17 @@ export default NextAuth({
             user.provider = oldUser.rows[0].provider
           } else if (res.ok && !oldUser.count) {
             const { id, ...dataUser } = user
-            const res = await fetch(`http://localhost:4000/api/v1/signup`, {
-              method: 'POST',
-              body: JSON.stringify({ ...dataUser, provider: account.provider }),
-              headers: { 'Content-Type': 'application/json' },
-            })
+            const res = await fetch(
+              `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/signup`,
+              {
+                method: 'POST',
+                body: JSON.stringify({
+                  ...dataUser,
+                  provider: account.provider,
+                }),
+                headers: { 'Content-Type': 'application/json' },
+              }
+            )
             const newUser = await res.json()
             if (res.ok) {
               user.id = newUser.id

@@ -25,7 +25,9 @@ import { useRouter } from 'next/router'
 import { useSession } from 'next-auth/react'
 
 export async function getServerSideProps({ params }) {
-  const res = await fetch(`http://localhost:4000/api/v1/product/${params.id}`)
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/product/${params.id}`
+  )
   const product = await res.json()
   return { props: { product } }
 }
@@ -39,7 +41,7 @@ export default function ProductDetails({ product }) {
 
   async function addToCart() {
     if (!session?.user.id) return router.push('/auth/signin')
-    const res = await fetch(`http://localhost:4000/api/v1/cart`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/cart`, {
       method: 'POST',
       body: JSON.stringify({
         productId: product.id,
@@ -48,7 +50,7 @@ export default function ProductDetails({ product }) {
       }),
       headers: {
         'Content-Type': 'application/json',
-        access_token: session?.user.accessToken,
+        authorization: `Bearer ${session?.user.accessToken}`,
       },
     })
     const data = await res.json()
@@ -59,14 +61,17 @@ export default function ProductDetails({ product }) {
 
   async function sewaSekarang() {
     if (!session?.user.id) return router.push('/auth/signin')
-    const res = await fetch('http://localhost:4000/api/v1/order/item', {
-      method: 'POST',
-      body: JSON.stringify({ productId: product.id, qty, lamaSewa }),
-      headers: {
-        'Content-Type': 'application/json',
-        access_token: session?.user.accessToken,
-      },
-    })
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/order/item`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ productId: product.id, qty, lamaSewa }),
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${session?.user.accessToken}`,
+        },
+      }
+    )
     const data = await res.json()
     if (res.ok) {
       const items = createToken({ items: [data] }, 24 * 60 * 60)
