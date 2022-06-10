@@ -19,8 +19,8 @@ export async function getServerSideProps({ req }) {
         permanent: false,
       },
     }
-  const res = await fetch('http://localhost:4000/api/v1/cart', {
-    headers: { access_token: token?.accessToken },
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/cart`, {
+    headers: { authorization: `Bearer ${token?.accessToken}` },
   })
   const fallbackData = await res.json()
   return { props: { fallbackData } }
@@ -43,12 +43,12 @@ export default function Cart({ fallbackData }) {
 
   function hapusItems() {
     if (checked.length > 0) {
-      fetch('http://localhost:4000/api/v1/cart', {
+      fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/cart`, {
         method: 'DELETE',
         body: JSON.stringify({ id: checked }),
         headers: {
           'Content-Type': 'application/json',
-          access_token: session?.user.accessToken,
+          authorization: `Bearer ${session?.user.accessToken}`,
         },
       }).then((res) => {
         if (res.status === 200) {
@@ -208,7 +208,7 @@ function Item({ order, useChecklist, setItems }) {
         return item
       })
     )
-    fetch('http://localhost:4000/api/v1/cart', {
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/cart`, {
       method: 'PUT',
       body: JSON.stringify({
         productId: order.productId,
@@ -216,7 +216,7 @@ function Item({ order, useChecklist, setItems }) {
         lamaSewa,
       }),
       headers: {
-        access_token: session?.user.accessToken,
+        authorization: `Bearer ${session?.user.accessToken}`,
         'Content-Type': 'application/json',
       },
     })

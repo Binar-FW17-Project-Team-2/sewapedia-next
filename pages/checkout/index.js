@@ -210,14 +210,17 @@ function MethodePembayaran({ items }) {
       return dispatch(errorToast('maaf terjadi kesalahan'))
     else {
       setLoadingBtn(true)
-      const res = await fetch('http://localhost:4000/api/v1/order', {
-        method: 'POST',
-        body: JSON.stringify({
-          items: items.map((item) => item.id),
-        }),
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-      })
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/order`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            items: items.map((item) => item.id),
+          }),
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+        }
+      )
       if (res.ok) {
         setLoadingBtn(false)
         // navigate('/');

@@ -143,7 +143,9 @@ function NavBot() {
   useEffect(() => {
     async function getCategories() {
       const categories = await (
-        await fetch('http://localhost:4000/api/v1/category')
+        await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/product/category`
+        )
       ).json()
       setCategories(categories)
     }
@@ -198,11 +200,11 @@ function NavBot() {
             <MenuItem
               onClick={() => {
                 handleClose()
-                router.push(`/products?category=${category.name}`)
+                router.push(`/products?category=${category.category}`)
               }}
               key={idx}
             >
-              {category.name}
+              {`${category.category} (${category.count})`}
             </MenuItem>
           ))}
         </CategoryWrap>

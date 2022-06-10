@@ -4,11 +4,11 @@ import Layout from '../components/Layout'
 
 export async function getStaticProps() {
   const { rows: list1 } = await (
-    await fetch('http://localhost:4000/api/v1/product?limit=6')
+    await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/product?limit=6`)
   ).json()
   const { rows: list2 } = await (
     await fetch(
-      'http://localhost:4000/api/v1/product?limit=6&orderBy=createdAt',
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/product?limit=6&orderBy=createdAt`,
       {
         credentials: 'include',
       }
