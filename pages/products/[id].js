@@ -20,6 +20,9 @@ import { useDispatch } from 'react-redux'
 import { errorToast, successToast } from '../../redux/slices/toastSlice'
 import Image from 'next/image'
 import Layout from '../../components/Layout'
+import { createToken } from '../../utils/tokenHandler'
+import { useRouter } from 'next/router'
+import { useSession } from 'next-auth/react'
 
 export async function getServerSideProps({ params }) {
   const res = await fetch(`http://localhost:4000/api/v1/product/${params.id}`)
@@ -30,18 +33,23 @@ export async function getServerSideProps({ params }) {
 export default function ProductDetails({ product }) {
   const [qty, setQty] = useState(1)
   const [lamaSewa, setLamaSewa] = useState(1)
+  const { data: session } = useSession()
   const dispatch = useDispatch()
+  const router = useRouter()
 
   async function addToCart() {
+    if (!session?.user.id) return router.push('/auth/signin')
     const res = await fetch(`http://localhost:4000/api/v1/cart`, {
       method: 'POST',
-      credentials: 'include',
       body: JSON.stringify({
         productId: product.id,
         lamaSewa: 1,
         qty: 1,
       }),
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        access_token: session?.user.accessToken,
+      },
     })
     const data = await res.json()
     res.ok
@@ -50,16 +58,22 @@ export default function ProductDetails({ product }) {
   }
 
   async function sewaSekarang() {
-    // const res = await fetch('http://localhost:4000/api/v1/order/item', {
-    //   method: 'POST',
-    //   body: JSON.stringify({ productId: product.id, qty, lamaSewa}),
-    //   credentials: 'include',
-    //   headers: {"Content-Type": "application/json"}
-    // })
-    // const data = await res.json();
-    // if (res.status === 201) {
-    //   // navigate('/checkout', {state: [data]})
-    // }
+    if (!session?.user.id) return router.push('/auth/signin')
+    const res = await fetch('http://localhost:4000/api/v1/order/item', {
+      method: 'POST',
+      body: JSON.stringify({ productId: product.id, qty, lamaSewa }),
+      headers: {
+        'Content-Type': 'application/json',
+        access_token: session?.user.accessToken,
+      },
+    })
+    const data = await res.json()
+    if (res.ok) {
+      const items = createToken({ items: [data] }, 24 * 60 * 60)
+      router.push(`/checkout?items=${items}`)
+    } else {
+      dispatch(errorToast('maaf terjadi kesalahan'))
+    }
   }
 
   return (
