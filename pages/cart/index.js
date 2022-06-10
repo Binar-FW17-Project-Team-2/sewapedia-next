@@ -7,6 +7,8 @@ import { useDispatch } from 'react-redux'
 import { errorToast } from '../../redux/slices/toastSlice'
 import { getToken } from 'next-auth/jwt'
 import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/router'
+import { createToken } from '../../utils/tokenHandler'
 
 export async function getServerSideProps({ req }) {
   const token = await getToken({ req })
@@ -28,6 +30,7 @@ export default function Cart({ fallbackData }) {
   const [items, setItems] = useState(fallbackData)
   const [checked, setChecked] = useState([])
   const dispath = useDispatch()
+  const router = useRouter()
   const { data: session } = useSession()
 
   function pilihSemua(e) {
@@ -66,10 +69,11 @@ export default function Cart({ fallbackData }) {
     if (!checked.length) {
       return dispath(errorToast('pilih item yg mau dicheckout!!'))
     }
-    const state = items.filter(
+    const data = items.filter(
       (item) => item.id === checked.find((id) => id === item.id)
     )
-    // navigate('/checkout', {state})
+    const payload = createToken({ items: data }, 24 * 60 * 60)
+    router.push(`/checkout?items=${payload}`)
   }
 
   return (
