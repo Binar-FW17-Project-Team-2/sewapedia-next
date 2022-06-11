@@ -1,31 +1,47 @@
 import { Box, Container, Pagination, Stack, Typography } from '@mui/material'
+import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import Card from '../../components/Card'
 import Layout from '../../components/Layout'
 
 export async function getServerSideProps({ query }) {
+  const activePage = query.page ? ~~query.page : 1
   const category = query.category ? `&category=${query.category}` : ''
+  const name = query.name ? `&name=${query.name}` : ''
+  const limit = `&limit=${query.limit ?? 6}`
+  const page = `offset=${query.page ? query.limit * (query.page - 1) : 0}`
   const fallbackData = await (
     await fetch(
-      `${
-        process.env.NEXT_PUBLIC_BASE_URL
-      }/api/v1/product?limit=${6}&offset=0${category}`
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/product?${page}${limit}${category}${name}`
     )
   ).json()
-  return { props: { fallbackData } }
+  return {
+    props: {
+      fallbackData,
+      category,
+      limit,
+      activePage,
+      name,
+    },
+  }
 }
 
-export default function Products({ fallbackData }) {
+export default function Products({
+  fallbackData,
+  name,
+  category,
+  limit,
+  activePage,
+}) {
+  const router = useRouter()
   const [products, setProducts] = useState(fallbackData)
-  const [page, setPage] = useState(1)
-  const limit = 6
 
   useEffect(() => {
     setProducts(fallbackData)
   }, [fallbackData])
 
   function handlePagination(event, value) {
-    setPage(value)
+    router.push(`/products?page=${value}${name}${category}${limit}`)
   }
 
   return (
@@ -79,8 +95,8 @@ export default function Products({ fallbackData }) {
         </Box>
         <Stack spacing={2} alignItems="center">
           <Pagination
-            count={Math.ceil(products.count / limit)}
-            page={page}
+            count={Math.ceil(products.count / limit.split('=')[1])}
+            page={activePage}
             onChange={handlePagination}
             variant="outlined"
             shape="rounded"

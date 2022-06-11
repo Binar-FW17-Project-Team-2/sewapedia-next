@@ -27,18 +27,15 @@ import {
   Pedia,
   ProfileNameMobile,
   ProfilWrap,
-  SearchBtn,
-  SearchInput,
-  SearchWrap,
   Sewa,
   WrapNav,
   WrapNavBot,
   WrapNavMid,
   WrapNavTop,
 } from '../styles/navbar'
+import SearchProduct from './SearchProduct'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import { theme } from '../styles/theme'
-import SearchIcon from '@mui/icons-material/Search'
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined'
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined'
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined'
@@ -70,12 +67,7 @@ function NavTop() {
 
   return (
     <WrapNavTop>
-      <SearchWrap>
-        <SearchInput placeholder="serach product" />
-        <SearchBtn type="submit">
-          <SearchIcon />
-        </SearchBtn>
-      </SearchWrap>
+      <SearchProduct />
       <MenuWrap>
         {data?.user
           ? [
@@ -319,7 +311,7 @@ function BotMenu({ children, href, ...props }) {
 
   return (
     <MenuBot
-      {...(router.asPath === href
+      {...(router.asPath.startsWith(href)
         ? {
             sx: {
               '&:after': {
