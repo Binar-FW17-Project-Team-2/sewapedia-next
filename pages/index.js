@@ -36,6 +36,7 @@ export default function Home({ list1, list2 }) {
             height: '510px',
             maxHeight: '100vw',
             backgroundColor: '#30694D',
+            overflow: 'hidden',
           }}
         >
           <Swiper
