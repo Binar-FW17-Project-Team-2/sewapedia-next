@@ -1,20 +1,15 @@
 import { Box, Typography } from '@mui/material'
+import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { useDispatch } from 'react-redux'
-import Image from 'next/image'
+import { addLastSeen } from '../../redux/slices/lastSeenSlice'
 
-function SideCard({ product }) {
+export default function Card({ product }) {
   const router = useRouter()
   const dispatch = useDispatch()
 
   function clickProduct() {
-    const payload = {
-      id: product.id,
-      img: product.img,
-      name: product.name,
-      price: product.price,
-    }
-    dispatch(addLastSeen(payload))
+    dispatch(addLastSeen(product))
     router.push(`/products/${product.id}`)
   }
 
@@ -40,7 +35,7 @@ function SideCard({ product }) {
           backgroundColor: 'tomato',
         }}
       >
-        <Image src={product.img} alt={product.name} layout="fill" />
+        <Image src={product.img_url[0]} alt={product.name} layout="fill" />
       </Box>
       <Typography
         width="calc(100% - 70px)"

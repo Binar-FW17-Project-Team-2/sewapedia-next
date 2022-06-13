@@ -9,26 +9,29 @@ import {
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined'
-import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined'
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined'
 import { useDispatch } from 'react-redux'
-import { deleteLastSeen, setLastSeen } from '../redux/slices/lastSeenSlice'
+import { setLastSeen } from '../redux/slices/lastSeenSlice'
 import LastSeen from './sidemenu/LastSeen'
+import Wishlist from './sidemenu/SideWishlist'
+import { getWishlist } from '../redux/slices/wishlistSlice'
+import { useSession } from 'next-auth/react'
 
 export default function SideMenu() {
+  const { data } = useSession()
   const dispatch = useDispatch()
   const [open, setOpen] = useState(false)
   const [menu, setMenu] = useState('')
 
   function handleOpen(menu) {
-    if (menu === 'lastseen') {
-      const lastSeen = JSON.parse(localStorage.getItem('lastSeen'))
-      if (lastSeen?.expiry < Date.now()) {
-        dispatch(deleteLastSeen())
-      } else {
-        dispatch(setLastSeen(lastSeen))
-      }
-    }
+    if (menu === 'lastseen') dispatch(setLastSeen())
+    if (menu === 'wishlist')
+      dispatch(
+        getWishlist({
+          token: data.user.accessToken,
+          userId: data.user.id,
+        })
+      )
     setOpen(true)
     setMenu(menu)
   }
@@ -74,14 +77,6 @@ export default function SideMenu() {
           <QuickMenu
             onClick={(event) => {
               event.stopPropagation()
-              handleOpen('profil')
-            }}
-          >
-            <PersonOutlineOutlinedIcon sx={{ color: 'white' }} />
-          </QuickMenu>
-          <QuickMenu
-            onClick={(event) => {
-              event.stopPropagation()
               handleOpen('lastseen')
             }}
           >
@@ -116,14 +111,12 @@ export default function SideMenu() {
             overflowY: 'auto',
           }}
         >
-          {menu === 'profil' ? (
-            <Typography>dari profil</Typography>
-          ) : menu === 'lastseen' ? (
+          {menu === 'lastseen' ? (
             <LastSeen />
           ) : menu === 'cart' ? (
             <Typography>dari cart</Typography>
           ) : menu === 'wishlist' ? (
-            <Typography>dari wishlist</Typography>
+            <Wishlist />
           ) : null}
         </Box>
       </Box>
