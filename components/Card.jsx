@@ -2,11 +2,17 @@ import { useState } from 'react'
 import { Box, styled, Typography } from '@mui/material'
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined'
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart'
+import FavoriteIcon from '@mui/icons-material/Favorite'
 import { useRouter } from 'next/router'
 import { useSession } from 'next-auth/react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { addLastSeen } from '../redux/slices/lastSeenSlice'
 import { errorToast, successToast } from '../redux/slices/toastSlice'
+import {
+  selectWishlist,
+  addWishlist,
+  deleteWishlist,
+} from '../redux/slices/wishlistSlice'
 
 export default function Card({ product, sx }) {
   const router = useRouter()
@@ -86,8 +92,9 @@ export default function Card({ product, sx }) {
 }
 
 function Action({ product }) {
+  const wishlist = useSelector(selectWishlist)
   const dispatch = useDispatch()
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
 
   async function addToCart(e) {
     e.stopPropagation()
@@ -111,27 +118,27 @@ function Action({ product }) {
     }
   }
 
+  async function removeToWishlist(e) {
+    e.stopPropagation()
+    if (status === 'loading') return
+    dispatch(
+      deleteWishlist({
+        token: session.user.accessToken,
+        userId: session.user.id,
+        productId: product.id,
+      })
+    )
+  }
+
   async function addToWishlist(e) {
     e.stopPropagation()
-    console.log(product.id)
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/wishlist`,
-      {
-        method: 'POST',
-        body: JSON.stringify({ productId: product.id }),
-        headers: {
-          'Content-Type': 'application/json',
-          authorization: `Bearer ${session?.user.accessToken}`,
-        },
-      }
+    if (status === 'loading') return
+    dispatch(
+      addWishlist({
+        token: session.user.accessToken,
+        product: product,
+      })
     )
-    const data = await res.json()
-    if (res.status === 200) {
-      return dispatch(successToast(data.message))
-    } else {
-      console.log(data)
-      return dispatch(errorToast('gagal masuk wishlist'))
-    }
   }
 
   return (
@@ -145,9 +152,15 @@ function Action({ product }) {
         transition: '.5s',
       }}
     >
-      <Btn onClick={addToWishlist}>
-        <FavoriteBorderOutlinedIcon sx={{ color: 'white' }} />
-      </Btn>
+      {wishlist.data.some((val) => val.id === product.id) ? (
+        <Btn onClick={removeToWishlist}>
+          <FavoriteIcon sx={{ color: 'red' }} />
+        </Btn>
+      ) : (
+        <Btn onClick={addToWishlist}>
+          <FavoriteBorderOutlinedIcon sx={{ color: 'red' }} />
+        </Btn>
+      )}
       <Btn onClick={addToCart}>
         <AddShoppingCartIcon sx={{ color: 'white' }} />
       </Btn>
