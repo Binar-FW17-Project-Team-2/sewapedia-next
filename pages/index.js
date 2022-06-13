@@ -3,12 +3,16 @@ import ListProduct from '../components/ListProduct'
 import Layout from '../components/Layout'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Autoplay, EffectCreative, Pagination } from 'swiper'
+import { useDispatch } from 'react-redux'
+import { getWishlist } from '../redux/slices/wishlistSlice'
+import { useSession } from 'next-auth/react'
 import 'swiper/css'
 import 'swiper/css/pagination'
 import 'swiper/css/navigation'
 import 'swiper/css/effect-creative'
+import { useEffect } from 'react'
 
-export async function getStaticProps() {
+export async function getServerSideProps() {
   const { rows: list1 } = await (
     await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/product?limit=6`)
   ).json()
@@ -27,6 +31,19 @@ export async function getStaticProps() {
 }
 
 export default function Home({ list1, list2 }) {
+  const dispacth = useDispatch()
+  const { data, status } = useSession()
+
+  useEffect(() => {
+    if (status === 'loading') return
+    dispacth(
+      getWishlist({
+        token: data.user.accessToken,
+        userId: data.user.id,
+      })
+    )
+  }, [status])
+
   return (
     <Layout>
       <Box pt={1}>
