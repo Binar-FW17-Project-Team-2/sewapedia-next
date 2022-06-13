@@ -31,7 +31,7 @@ export const lastSeenSlice = createSlice({
       if (lastSeen?.expiry < Date.now()) {
         localStorage.removeItem('lastSeen')
         state.lastSeen = { value: [], expiry: 0 }
-      } else {
+      } else if (lastSeen) {
         state.lastSeen = lastSeen
       }
     },
