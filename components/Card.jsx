@@ -20,13 +20,7 @@ export default function Card({ product, sx }) {
   const [open, setOpen] = useState(false)
 
   function handleClick() {
-    const payload = {
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      img: product.img_url[0],
-    }
-    dispatch(addLastSeen(payload))
+    dispatch(addLastSeen(product))
     router.push(`/products/${product.id}`)
   }
 

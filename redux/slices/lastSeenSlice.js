@@ -26,17 +26,18 @@ export const lastSeenSlice = createSlice({
       )
       state.lastSeen = { value, expiry: tomorrow }
     },
-    deleteLastSeen: (state) => {
-      localStorage.removeItem('lastSeen')
-      state.lastSeen = { value: [], expiry: 0 }
-    },
     setLastSeen: (state, action) => {
-      state.lastSeen = action.payload
+      const lastSeen = JSON.parse(localStorage.getItem('lastSeen'))
+      if (lastSeen?.expiry < Date.now()) {
+        localStorage.removeItem('lastSeen')
+        state.lastSeen = { value: [], expiry: 0 }
+      } else {
+        state.lastSeen = lastSeen
+      }
     },
   },
 })
 
-export const { addLastSeen, deleteLastSeen, setLastSeen } =
-  lastSeenSlice.actions
+export const { addLastSeen, setLastSeen } = lastSeenSlice.actions
 export const selectLastSeen = (state) => state.lastSeen.lastSeen
 export default lastSeenSlice.reducer
