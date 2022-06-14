@@ -81,7 +81,7 @@ export default function Products({
             mr: '-10px',
           }}
         >
-          {!products.rows.length ? (
+          {!products.rows?.length ? (
             <Typography>products tidaak ada</Typography>
           ) : (
             products.rows.map((product) => (
@@ -95,7 +95,7 @@ export default function Products({
         </Box>
         <Stack spacing={2} alignItems="center">
           <Pagination
-            count={Math.ceil(products.count / limit.split('=')[1])}
+            count={Math.ceil((products.count ?? 0) / limit.split('=')[1])}
             page={activePage}
             onChange={handlePagination}
             variant="outlined"

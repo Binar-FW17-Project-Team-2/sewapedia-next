@@ -80,7 +80,7 @@ export const wishlistSlice = createSlice({
       state.data = action.payload
     })
     builder.addCase(addWishlist.fulfilled, (state, action) => {
-      state.data.push(action.payload)
+      state.data.unshift(action.payload)
     })
     builder.addCase(deleteWishlist.fulfilled, (state, action) => {
       state.data = state.data.filter((product) => product.id !== action.payload)
