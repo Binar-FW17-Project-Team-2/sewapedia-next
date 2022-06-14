@@ -35,12 +35,14 @@ export default function Home({ list1, list2 }) {
 
   useEffect(() => {
     if (status === 'loading') return
-    dispacth(
-      getWishlist({
-        token: data.user.accessToken,
-        userId: data.user.id,
-      })
-    )
+    if (data) {
+      dispacth(
+        getWishlist({
+          token: data.user.accessToken,
+          userId: data.user.id,
+        })
+      )
+    }
   }, [status])
 
   return (

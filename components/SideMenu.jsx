@@ -16,6 +16,8 @@ import LastSeen from './sidemenu/LastSeen'
 import Wishlist from './sidemenu/SideWishlist'
 import { getWishlist } from '../redux/slices/wishlistSlice'
 import { useSession } from 'next-auth/react'
+import { getCart } from '../redux/slices/cartSlice'
+import Cart from './sidemenu/SideCart'
 
 export default function SideMenu() {
   const { data } = useSession()
@@ -25,11 +27,17 @@ export default function SideMenu() {
 
   function handleOpen(menu) {
     if (menu === 'lastseen') dispatch(setLastSeen())
-    if (menu === 'wishlist')
+    if (menu === 'wishlist' && data)
       dispatch(
         getWishlist({
           token: data.user.accessToken,
           userId: data.user.id,
+        })
+      )
+    if (menu === 'cart' && data)
+      dispatch(
+        getCart({
+          token: data.user.accessToken,
         })
       )
     setOpen(true)
@@ -114,7 +122,7 @@ export default function SideMenu() {
           {menu === 'lastseen' ? (
             <LastSeen />
           ) : menu === 'cart' ? (
-            <Typography>dari cart</Typography>
+            <Cart />
           ) : menu === 'wishlist' ? (
             <Wishlist />
           ) : null}

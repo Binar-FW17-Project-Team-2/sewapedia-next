@@ -3,12 +3,18 @@ import { styled } from '@mui/system'
 import { useEffect, useRef, useState } from 'react'
 import InputNumber from '../../components/InputNumber'
 import Layout from '../../components/Layout'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { errorToast } from '../../redux/slices/toastSlice'
 import { getToken } from 'next-auth/jwt'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { createToken } from '../../utils/tokenHandler'
+import {
+  deleteCart,
+  editCart,
+  getCart,
+  selectCart,
+} from '../../redux/slices/cartSlice'
 
 export async function getServerSideProps({ req }) {
   const token = await getToken({ req })
@@ -19,58 +25,54 @@ export async function getServerSideProps({ req }) {
         permanent: false,
       },
     }
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/cart`, {
-    headers: { authorization: `Bearer ${token?.accessToken}` },
-  })
-  const fallbackData = await res.json()
-  return { props: { fallbackData } }
+  return { props: {} }
 }
 
-export default function Cart({ fallbackData }) {
-  const [items, setItems] = useState(fallbackData)
+export default function Cart() {
+  const cart = useSelector(selectCart)
   const [checked, setChecked] = useState([])
   const dispath = useDispatch()
   const router = useRouter()
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
+
+  useEffect(() => {
+    if (status === 'loading') return
+    if (session) {
+      dispath(
+        getCart({
+          token: session.user.accessToken,
+        })
+      )
+    }
+  }, [status])
 
   function pilihSemua(e) {
     if (e.target.checked) {
-      const checked = items.map((item) => item.id)
+      const checked = cart.map((item) => item.productDetails.id)
       return setChecked(checked)
     }
     setChecked([])
   }
 
   function hapusItems() {
-    if (checked.length > 0) {
-      fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/cart`, {
-        method: 'DELETE',
-        body: JSON.stringify({ id: checked }),
-        headers: {
-          'Content-Type': 'application/json',
-          authorization: `Bearer ${session?.user.accessToken}`,
-        },
-      }).then((res) => {
-        if (res.status === 200) {
-          setItems((prev) =>
-            prev.filter(
-              (item) => item.id !== checked.find((id) => id === item.id)
-            )
-          )
-          setChecked([])
-        }
+    if (status === 'loading') return
+    if (!checked.length)
+      return dispath(errorToast('pilih item terlebih dahulu'))
+    dispath(
+      deleteCart({
+        token: session.user.accessToken,
+        productId: checked,
       })
-    } else {
-      dispath(errorToast('pilih item terlebih dahulu'))
-    }
+    )
+    setChecked([])
   }
 
   function checkout() {
     if (!checked.length) {
       return dispath(errorToast('pilih item yg mau dicheckout!!'))
     }
-    const data = items.filter(
-      (item) => item.id === checked.find((id) => id === item.id)
+    const data = cart.filter(
+      (item) => item.productId === checked.find((id) => id === item.productId)
     )
     const payload = createToken({ items: data }, 24 * 60 * 60)
     router.push(`/checkout?items=${payload}`)
@@ -99,7 +101,7 @@ export default function Cart({ fallbackData }) {
                   onChange={pilihSemua}
                   color="primary"
                   sx={{ p: 0 }}
-                  checked={items?.length === checked.length ? true : false}
+                  checked={cart.length === checked.length ? true : false}
                 />
               </Th>
               <Th>Produk</Th>
@@ -110,12 +112,11 @@ export default function Cart({ fallbackData }) {
             </tr>
           </Thead>
           <tbody>
-            {items.map((item) => (
+            {cart.map((item) => (
               <Item
-                key={item.id}
+                key={item.productDetails.id}
                 order={item}
                 useChecklist={{ checked, setChecked }}
-                setItems={setItems}
               />
             ))}
           </tbody>
@@ -149,7 +150,7 @@ export default function Cart({ fallbackData }) {
           <Box sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
             <Checkbox
               onChange={pilihSemua}
-              checked={items.length === checked.length ? true : false}
+              checked={cart.length === checked.length ? true : false}
             />
             <Typography>Pilih Semua</Typography>
           </Box>
@@ -171,7 +172,18 @@ export default function Cart({ fallbackData }) {
             }}
           >
             <Typography color="primary" variant="h6" fontWeight="bold">
-              Rp{items.reduce((total, item) => total + item.subTotalPrice, 0)},-
+              Rp
+              {cart
+                .filter((e) => {
+                  return (
+                    e.productDetails.id ===
+                    checked.find((pId) => {
+                      return pId === e.productDetails.id
+                    })
+                  )
+                })
+                .reduce((total, item) => total + item.subTotalPrice, 0)}
+              ,-
             </Typography>
             <Button onClick={checkout} variant="contained">
               Checkout
@@ -183,11 +195,12 @@ export default function Cart({ fallbackData }) {
   )
 }
 
-function Item({ order, useChecklist, setItems }) {
+function Item({ order, useChecklist }) {
   const { checked, setChecked } = useChecklist
   const [qty, setQty] = useState(order.qty)
   const [lamaSewa, setLamaSewa] = useState(order.lamaSewa)
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
+  const dispatch = useDispatch()
 
   const firstRender = useRef(true)
   useEffect(() => {
@@ -195,38 +208,22 @@ function Item({ order, useChecklist, setItems }) {
       firstRender.current = false
       return
     }
-    setItems((prev) =>
-      prev.map((item) => {
-        if (item.id === order.id) {
-          return {
-            ...item,
-            qty,
-            lamaSewa,
-            subTotalPrice: qty * lamaSewa * item.productDetails.price,
-          }
-        }
-        return item
-      })
-    )
-    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/cart`, {
-      method: 'PUT',
-      body: JSON.stringify({
-        productId: order.productId,
+    if (status === 'loading') return
+    dispatch(
+      editCart({
+        token: session.user.accessToken,
+        product: order.productDetails,
         qty,
         lamaSewa,
-      }),
-      headers: {
-        authorization: `Bearer ${session?.user.accessToken}`,
-        'Content-Type': 'application/json',
-      },
-    })
+      })
+    )
   }, [qty, lamaSewa])
 
   function pilih(e) {
     if (e.target.checked) {
-      setChecked((prev) => [...prev, order.id])
+      setChecked((prev) => [...prev, order.productId])
     } else {
-      setChecked((prev) => prev.filter((v) => v !== order.id))
+      setChecked((prev) => prev.filter((v) => v !== order.productId))
     }
   }
 
@@ -236,7 +233,7 @@ function Item({ order, useChecklist, setItems }) {
         <Checkbox
           onChange={pilih}
           color="primary"
-          checked={checked.find((id) => order.id === id) ? true : false}
+          checked={checked.find((id) => order.productId === id) ? true : false}
         />
       </Td>
       <Td data-th="Product">

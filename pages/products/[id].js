@@ -35,11 +35,12 @@ export async function getServerSideProps({ params }) {
 export default function ProductDetails({ product }) {
   const [qty, setQty] = useState(1)
   const [lamaSewa, setLamaSewa] = useState(1)
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const dispatch = useDispatch()
   const router = useRouter()
 
   async function addToCart() {
+    if (status === 'loading') return
     if (!session?.user.id) return router.push('/auth/signin')
     const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/cart`, {
       method: 'POST',
@@ -60,6 +61,7 @@ export default function ProductDetails({ product }) {
   }
 
   async function sewaSekarang() {
+    if (status === 'loading') return
     if (!session?.user.id) return router.push('/auth/signin')
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/order/item`,
