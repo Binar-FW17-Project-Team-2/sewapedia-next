@@ -44,6 +44,7 @@ import { useRouter } from 'next/router'
 import Image from 'next/image'
 import { useSession, signIn, signOut } from 'next-auth/react'
 
+
 export default function Navbar() {
   return (
     <NavBar>
@@ -161,6 +162,7 @@ function NavBot() {
           <MenuBot onClick={handleOpen}> Category </MenuBot>
           <BotMenu href="/products">Products</BotMenu>
           <BotMenu href="/event">Event</BotMenu>
+          <BotMenu href="/FAQ">About Us</BotMenu>
           {data?.user.role === 'admin' ? (
             <BotMenu href="/dashboard">Dashboard</BotMenu>
           ) : null}

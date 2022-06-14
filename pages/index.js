@@ -1,8 +1,6 @@
 import { Box } from '@mui/material'
 import ListProduct from '../components/ListProduct'
 import Layout from '../components/Layout'
-import { Swiper, SwiperSlide } from 'swiper/react'
-import { Autoplay, EffectCreative, Pagination } from 'swiper'
 import { useDispatch } from 'react-redux'
 import { getWishlist } from '../redux/slices/wishlistSlice'
 import { useSession } from 'next-auth/react'
@@ -11,6 +9,7 @@ import 'swiper/css/pagination'
 import 'swiper/css/navigation'
 import 'swiper/css/effect-creative'
 import { useEffect } from 'react'
+import Carousel from '../components/Carousel'
 
 export async function getServerSideProps() {
   const { rows: list1 } = await (
@@ -50,60 +49,13 @@ export default function Home({ list1, list2 }) {
         <Box
           sx={{
             width: '100%',
-            height: '510px',
+            height: '610px',
             maxHeight: '100vw',
             backgroundColor: '#30694D',
             overflow: 'hidden',
           }}
         >
-          <Swiper
-            slidesPerView={1}
-            autoplay={{
-              delay: 2500,
-              disableOnInteraction: false,
-            }}
-            loop={true}
-            pagination={{
-              clickable: true,
-            }}
-            effect={'creative'}
-            creativeEffect={{
-              prev: {
-                shadow: true,
-                translate: ['-20%', 0, -1],
-              },
-              next: {
-                translate: ['100%', 0, 0],
-              },
-            }}
-            modules={[Autoplay, Pagination, EffectCreative]}
-            className="mySwiper"
-          >
-            <SwiperSlide>
-              <Box
-                sx={{
-                  position: 'relative',
-                  width: '100%',
-                  height: '510px',
-                  backgroundColor: '#B7D0B1',
-                }}
-              >
-                slide1
-              </Box>
-            </SwiperSlide>
-            <SwiperSlide>
-              <Box
-                sx={{
-                  position: 'relative',
-                  width: '100%',
-                  height: '510px',
-                  backgroundColor: '#316D4D',
-                }}
-              >
-                slide3
-              </Box>
-            </SwiperSlide>
-          </Swiper>
+        <Carousel/>
         </Box>
         <Box>
           <ListProduct title="Bagaimana Dengan Ini" products={list1} />
