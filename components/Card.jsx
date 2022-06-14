@@ -114,25 +114,29 @@ function Action({ product }) {
 
   async function removeToWishlist(e) {
     e.stopPropagation()
-    if (status === 'loading') return
-    dispatch(
-      deleteWishlist({
-        token: session.user.accessToken,
-        userId: session.user.id,
-        productId: product.id,
-      })
-    )
+    if (session) {
+      dispatch(
+        deleteWishlist({
+          token: session.user.accessToken,
+          userId: session.user.id,
+          productId: product.id,
+        })
+      )
+    }
   }
 
   async function addToWishlist(e) {
     e.stopPropagation()
-    if (status === 'loading') return
-    dispatch(
-      addWishlist({
-        token: session.user.accessToken,
-        product: product,
-      })
-    )
+    if (session) {
+      dispatch(
+        addWishlist({
+          token: session.user.accessToken,
+          product: product,
+        })
+      )
+    } else {
+      router.push('/auth/signin')
+    }
   }
 
   return (
