@@ -10,7 +10,8 @@ import { useState } from "react";
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { Button } from "@mui/material";
-
+import NavBar from '../components/Navbar'
+import Footer from "../components/Footer";
 
 const CustomAccordion = styled(Accordion)(({ theme }) => ({
   backgroundColor: theme.palette.grey[900],
@@ -35,9 +36,7 @@ function FAQ() {
 
   return (
     <BorderedBottomBox>
-     <Button align="center" href="/">
-          Back to Home
-    </Button>
+      <NavBar/>
       <Container maxWidth="md" sx={{ py: 6 }}>
         <Typography
           variant="h3"
@@ -146,6 +145,7 @@ function FAQ() {
           </CustomAccordion>
         </Stack>
       </Container>
+      <Footer/>
     </BorderedBottomBox>
   );
 };
