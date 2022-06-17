@@ -13,12 +13,22 @@ import {
 } from '../../redux/slices/toastSlice'
 import { useDispatch } from 'react-redux'
 import { useState } from 'react'
-import LocationOnIcon from '@mui/icons-material/LocationOn'
+import PersonIcon from '@mui/icons-material/Person'
 import { verifyToken } from '../../utils/tokenHandler'
 import Layout from '../../components/Layout'
+import { getToken } from 'next-auth/jwt'
+import { useSession } from 'next-auth/react'
 
-export async function getServerSideProps({ query }) {
+export async function getServerSideProps({ query, req }) {
   const payload = verifyToken(query.items)
+  const token = await getToken({ req })
+  if (!token)
+    return {
+      redirect: {
+        destination: '/auth/signin',
+        permanent: false,
+      },
+    }
   if (!payload)
     return {
       redirect: {
@@ -30,6 +40,8 @@ export async function getServerSideProps({ query }) {
 }
 
 export default function Checkout({ items }) {
+  const { data: session } = useSession()
+
   return (
     <Layout>
       <Box
@@ -51,23 +63,19 @@ export default function Checkout({ items }) {
           />
           <Content>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-              <LocationOnIcon color="primary" />
+              <PersonIcon color="primary" />
               <Typography
                 color="primary"
                 variant="h6"
                 sx={{ verticalAlign: 'center' }}
               >
-                Alamat Pengiriman
+                Penyewa
               </Typography>
-              <Button color="secondary" sx={{ ml: 'auto', fontWeight: 'bold' }}>
-                Ubah
-              </Button>
             </Box>
-            <Typography
-              variant="body1"
-              fontWeight="bold"
-            >{`Nama Pelanggan (+62) 89688227070`}</Typography>
-            <Typography variant="body1">{`Jl.Trengguli RT.03 RW.02 SUKOLILO, SURABAYA, JAWA TIMUR, ID 60111`}</Typography>
+            <Typography variant="body1" fontWeight="bold">
+              {session?.user.name}
+            </Typography>
+            <Typography variant="body1">{session?.user.email}</Typography>
           </Content>
 
           {/* Produk Dipesan */}
@@ -94,7 +102,7 @@ export default function Checkout({ items }) {
   )
 }
 
-function ProdukDipesan({ item }) {
+export function ProdukDipesan({ item }) {
   const { productDetails: product } = item
 
   return (
@@ -173,7 +181,7 @@ function ProdukDipesan({ item }) {
   )
 }
 
-const Content = styled(Box)({
+export const Content = styled(Box)({
   boxSizing: 'border-box',
   width: '100%',
   padding: '25px 15px',
@@ -186,6 +194,7 @@ function MethodePembayaran({ items }) {
   const dispatch = useDispatch()
   const [method, setMethod] = useState()
   const [loadingBtn, setLoadingBtn] = useState(false)
+  const { data: session } = useSession()
   const menuPayment = [
     {
       name: 'ambil sendiri',
@@ -209,25 +218,29 @@ function MethodePembayaran({ items }) {
     else if (!items.length)
       return dispatch(errorToast('maaf terjadi kesalahan'))
     else {
-      setLoadingBtn(true)
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/order`,
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            items: items.map((item) => item.id),
-          }),
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
+      if (session) {
+        setLoadingBtn(true)
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/order`,
+          {
+            method: 'POST',
+            body: JSON.stringify({
+              items: items.map((item) => item.id),
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+              authorization: `Bearer ${session.user.accessToken}`,
+            },
+          }
+        )
+        if (res.ok) {
+          setLoadingBtn(false)
+          // navigate('/');
+          dispatch(successToast('pesanan telah dibuat silahkan cek email anda'))
+        } else {
+          setLoadingBtn(false)
+          dispatch(errorToast('pesanan gagal!!'))
         }
-      )
-      if (res.ok) {
-        setLoadingBtn(false)
-        // navigate('/');
-        dispatch(successToast('pesanan telah dibuat silahkan cek email anda'))
-      } else {
-        setLoadingBtn(false)
-        dispatch(errorToast('pesanan gagal!!'))
       }
     }
   }

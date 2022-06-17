@@ -79,7 +79,7 @@ export default function Cart() {
   }
 
   return (
-    <Layout>
+    <Layout title="Sewapedia | Keranjang">
       <Container sx={{ py: '50px' }}>
         <Typography
           sx={{
