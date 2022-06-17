@@ -84,7 +84,7 @@ export default function ProductDetails({ product }) {
   }
 
   return (
-    <Layout>
+    <Layout title={`Sewapedia | ${product.name}`}>
       <Container
         sx={{
           display: 'flex',

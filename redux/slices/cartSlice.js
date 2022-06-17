@@ -125,9 +125,11 @@ export const cartSlice = createSlice({
       const idx = state.data.findIndex(
         (v) => v.productDetails.id === product.id
       )
-      state.data[idx].qty = qty
-      state.data[idx].lamaSewa = lamaSewa
-      state.data[idx].subTotalPrice = product.price * qty * lamaSewa
+      if (state.data[idx]) {
+        state.data[idx].qty = qty
+        state.data[idx].lamaSewa = lamaSewa
+        state.data[idx].subTotalPrice = product.price * qty * lamaSewa
+      }
     })
     builder.addCase(deleteCart.fulfilled, (state, action) => {
       const { productId } = action.payload

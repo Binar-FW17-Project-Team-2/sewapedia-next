@@ -3,8 +3,14 @@ import * as Yup from 'yup'
 export const validationAddProduct = Yup.object({
   name: Yup.string().required('wajib di isi'),
   details: Yup.string().required('wajib di isi'),
-  price: Yup.number().min(1, 'price min 1').required('wajib di isi'),
-  stock: Yup.number().min(0, 'stock minimal 0').required('wajib di isi'),
+  price: Yup.number()
+    .min(1, 'price min 1')
+    .max(2000000000, 'price max 2000000000')
+    .required('wajib di isi'),
+  stock: Yup.number()
+    .min(0, 'stock minimal 0')
+    .max(10000, 'stock maximal 10000')
+    .required('wajib di isi'),
   category: Yup.string().required('wajib di isi'),
 })
 
